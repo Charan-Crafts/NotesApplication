@@ -4,7 +4,7 @@ const HomePageButtons = ({ name,text }) => {
 
     const handleOnClick =(e)=>{
 
-        if(name==="Login"){
+        if(name==="Navigate to Login"){
             navigate("/login")
         }else if(name==="Get Started"){
             navigate("/signup")

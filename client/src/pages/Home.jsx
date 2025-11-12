@@ -17,7 +17,7 @@ const Home = () => {
           <h2 className="font-serif italic text-xl sm:text-2xl mt-2 mb-4 text-gray-700">VibeNote — your thoughts, in tune with your mood.</h2>
           <div className="flex items-center justify-center gap-6 mt-2">
             <HomePageButtons name="Get Started"  text="Get Started" />
-            <HomePageButtons name="Login" text="Login" />
+            <HomePageButtons name="Navigate to Login" text="Login" />
           </div>
         </div>
       </div>
