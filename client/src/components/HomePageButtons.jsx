@@ -10,6 +10,8 @@ const HomePageButtons = ({ name,text }) => {
             navigate("/signup")
         }else if(name==="Back to Home"){
             navigate("/")
+        }else if(name==="back"){
+            navigate("/notes")
         }
     }
 
