@@ -15,8 +15,8 @@ const Signup = () => {
     setUserName("")
   }
   return (
-    <div className='h-screen flex justify-center items-center px-3 bg-gray-100'>
-      <form className='bg-green-50 h-[70vh] flex w-1/4 flex-col items-center justify-evenly' onSubmit={handleRegisterForm}>
+    <div className='h-screen flex justify-center items-center px-4 bg-gray-100'>
+      <form className='bg-green-50 h-[80vh] flex w-2/8 flex-col items-center justify-evenly' onSubmit={handleRegisterForm}>
         <h1 className='py-3 bg-gray-100 px-10 text-4xl mt-3 shadow-xl rounded-md font-serif'>Create Account</h1>
 
         <InputFields type="text" placeholder="Charan" value={userName}  setter={setUserName}/>

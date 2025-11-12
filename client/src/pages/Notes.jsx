@@ -1,10 +1,13 @@
 import React from 'react';
-
+import Navbar from '../components/Navbar';
 const Notes = () => {
   return (
-    <div>
-      <h1>Notes page</h1>
-      
+    <div className=' min-h-screen p-3 '>
+
+      <div className='bg-green-50'>
+        <Navbar></Navbar>
+      </div>
+
     </div>
   );
 }
