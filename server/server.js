@@ -12,7 +12,8 @@ const connectDB = require("./config/MongoDB")
 connectDB();
 
 app.use(cors({
-    origin:process.env.ORIGIN
+    origin:process.env.ORIGIN,
+    credentials:true
 }))
 app.use(express.json())
 

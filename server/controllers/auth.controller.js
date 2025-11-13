@@ -161,8 +161,7 @@ const userLogout = async (req, res) => {
         const userId = req.userId;
 
         
-        
-
+    
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized access - No user id found", success: false });
         }
