@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import HomePageButtons from '../HomePageButtons';
 import InputFields from '../InputFields';
+import axiosClient from '../../redux/axiosClient';
+import { useNavigate } from 'react-router-dom';
 
 import JoditEditor from 'jodit-react';
 
@@ -10,6 +12,19 @@ const JoditTextEditor = () => {
   const editor = useRef(null);
 
   const [content, setContent] = useState('');
+  const navigate = useNavigate();
+
+  const handleCreate = async () => {
+    try {
+      const res = await axiosClient.post('/notes/create-note', { title, content });
+      if (res.data && res.data.success) {
+        navigate('/notes');
+      }
+    } catch (err) {
+      console.error('Create failed', err);
+      window.alert('Failed to create note');
+    }
+  };
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
@@ -22,8 +37,8 @@ const JoditTextEditor = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <HomePageButtons name="Create" text="Create" type="button" className="bg-violet-600 text-white hover:bg-violet-700" />
-            <HomePageButtons name="back" text="Back" className="bg-white border border-gray-200 text-gray-800" />
+            <HomePageButtons name="Create" text="Create" type="button" onClick={handleCreate} className="bg-violet-600 text-white hover:bg-violet-700" />
+            <HomePageButtons name="Back to Home" text="Back" className="bg-white border border-gray-200 text-gray-800" />
           </div>
         </div>
 

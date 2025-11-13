@@ -1,14 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 
-import axios from "axios";
-
-import { api } from "../api.js"
+import axiosClient from "../axiosClient";
 // Create the thunk for the register user
 
 export const userRegistration = createAsyncThunk("userRegistration", async (useRouteLoaderData, { rejectWithValue }) => {
 
     try {
-        const response = await axios.post(`${api}/auth/signup`, useRouteLoaderData, { withCredentials: true });
+        const response = await axiosClient.post(`/auth/signup`, useRouteLoaderData);
 
         return response.data;
 
@@ -22,7 +20,7 @@ export const userLogin = createAsyncThunk(
     'userLogin',
     async (credentials, { rejectWithValue }) => {
         try {
-            const response = await axios.post(`${api}/auth/login`, credentials, { withCredentials: true });
+            const response = await axiosClient.post(`/auth/login`, credentials);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -33,15 +31,17 @@ export const userLogin = createAsyncThunk(
 // Logout thunk
 export const userLogout = createAsyncThunk('userLogout', async (_, { rejectWithValue }) => {
     try {
-        const response = await axios.post(`${api}/auth/logout`, {}, { withCredentials: true });
+        const response = await axiosClient.post(`/auth/logout`, {});
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response?.data || { message: 'Logout failed' });
     }
 });
 
+const persistedToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+
 const initialState = {
-    token: null,
+    token: persistedToken || null,
     user: null,
     error: null,
     isLoading: false
@@ -57,11 +57,16 @@ const authSlice = createSlice({
             state.isLoading = true
         })
         builder.addCase(userRegistration.fulfilled, (state, action) => {
-            console.log(action.payload);
+            // console.log(action.payload);
 
             state.isLoading = false
             state.user = action.payload.data.user
             state.token = action.payload.data.accessToken
+            try {
+                localStorage.setItem('accessToken', action.payload.data.accessToken);
+            } catch (err) {
+                // ignore storage errors
+            }
         })
         builder.addCase(userRegistration.rejected, (state, action) => {
             state.isLoading = false
@@ -75,6 +80,9 @@ const authSlice = createSlice({
             state.isLoading = false;
             state.user = action.payload.data.user;
             state.token = action.payload.data.accessToken;
+            try {
+                localStorage.setItem('accessToken', action.payload.data.accessToken);
+            } catch (err) { }
             state.error = null;
         });
         builder.addCase(userLogin.rejected, (state, action) => {
@@ -91,6 +99,9 @@ const authSlice = createSlice({
             state.user = null;
             state.token = null;
             state.error = null;
+            try {
+                localStorage.removeItem('accessToken');
+            } catch (err) { }
         });
         builder.addCase(userLogout.rejected, (state, action) => {
             state.isLoading = false;

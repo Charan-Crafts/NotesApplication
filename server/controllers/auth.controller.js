@@ -13,8 +13,9 @@ const convertPasswordToHash = async (password) => {
 
 // Update the code when deploying to production
 const options = {
-    httpOnly: false,
-    secure: false,
+    httpOnly: true,
+    secure: false, // set true in production when using HTTPS
+    sameSite: 'lax'
 }
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
@@ -24,7 +25,7 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
     const refreshToken = jwt.sign({ user: userId }, process.env.REFRESH_TOKEN_SECERT, { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN });
 
 
-    
+
 
     return { accessToken, refreshToken };
 
@@ -56,7 +57,7 @@ const userLogin = async (req, res) => {
         const { accessToken, refreshToken } = await generateAccessTokenAndRefreshToken(isUser._id);
 
 
-        
+
 
 
         // Update the refresh token in the database
@@ -121,7 +122,7 @@ const userRegistration = async (req, res) => {
         const savedUser = await userModel.create(newUser);
 
 
-       
+
 
         const { accessToken, refreshToken } = await generateAccessTokenAndRefreshToken(savedUser._id);
 
@@ -156,12 +157,12 @@ const userRegistration = async (req, res) => {
 const userLogout = async (req, res) => {
 
     try {
-        
-        
+
+
         const userId = req.userId;
 
-        
-    
+
+
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized access - No user id found", success: false });
         }
@@ -187,4 +188,39 @@ const userLogout = async (req, res) => {
     }
 }
 
-module.exports = { userRegistration, userLogin, userLogout };
+const refreshAccessToken = async (req, res) => {
+    try {
+        const refreshToken = req.cookies?.refreshToken;
+        if (!refreshToken) return res.status(401).json({ success: false, message: 'No refresh token' });
+
+        let payload;
+        try {
+            payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECERT);
+        } catch (err) {
+            return res.status(401).json({ success: false, message: 'Refresh token invalid or expired' });
+        }
+
+        const user = await userModel.findById(payload.user);
+        if (!user || !user.refreshToken || user.refreshToken !== refreshToken) {
+            return res.status(401).json({ success: false, message: 'Refresh token revoked' });
+        }
+
+        // Generate new tokens
+        const { accessToken, refreshToken: newRefreshToken } = await generateAccessTokenAndRefreshToken(user._id);
+
+        // Save new refresh token
+        user.refreshToken = newRefreshToken;
+        await user.save();
+
+        // Set cookies
+        res.cookie('accessToken', accessToken, options);
+        res.cookie('refreshToken', newRefreshToken, options);
+
+        return res.status(200).json({ success: true, message: 'Token refreshed', data: { accessToken } });
+    } catch (err) {
+        console.error('refresh error', err);
+        return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+}
+
+module.exports = { userRegistration, userLogin, userLogout, refreshAccessToken };
